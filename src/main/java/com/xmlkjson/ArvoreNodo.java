@@ -24,6 +24,19 @@ public class ArvoreNodo<T> implements Iterable<ArvoreNodo<T>> {
         return childNode;
     }
 
+
+    public T getData()
+    {
+        return this.Data;
+    }
+
+    public ArvoreNodo<T> returnToFather()
+    {
+        ArvoreNodo<T> fatherNode = this.Pai;
+        return fatherNode;
+        //return fatherNode.addChild(child);
+    }
+
     @Override
     public Iterator<ArvoreNodo<T>> iterator() {
         return null;
