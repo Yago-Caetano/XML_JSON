@@ -1,6 +1,6 @@
 package com.xmlkjson.models;
 
-import com.xmlkjson.ArvoreNodo;
+import com.xmlkjson.tree.ArvoreNodo;
 
 public class TagModel {
 

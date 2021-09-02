@@ -1,6 +1,7 @@
 package com.xmlkjson.controllers;
 
-import com.xmlkjson.ArvoreNodo;
+import com.xmlkjson.tree.Arvore;
+import com.xmlkjson.tree.ArvoreNodo;
 import com.xmlkjson.enums.EnumDecoder;
 import com.xmlkjson.models.TagModel;
 
@@ -11,13 +12,13 @@ public class ParserController {
     private EnumDecoder StatusAtual;
     private int InicioTag;
     private String Texto;
-    private ArvoreNodo<TagModel> Arvore;
+    private Arvore<TagModel> Arvore;
     private Stack<TagModel> TagsAbertas;
 
     public void decodificar(String texto)
     {
         Texto = texto;
-        Arvore = new ArvoreNodo(new TagModel());
+        Arvore = new Arvore<TagModel>();
         StatusAtual = EnumDecoder.PROCURANDO_INICIO_TAG;
 
         TagsAbertas = new Stack<TagModel>();
@@ -60,14 +61,14 @@ public class ParserController {
                         else
                         {
                             //tagPilha.Nodo.getData().setPosicaoValorFim(Indice);
-                            Arvore = tagPilha.Nodo.returnToFather();
+                            Arvore.retornarParaPai();
                         }
                     }
                     else
                     {
                         //se for tag de abertura, adciona na arvore
-                        Arvore = Arvore.addChild(tagAux);
-                        tagAux.setNodo(Arvore);
+                        Arvore.adcionarNodo(tagAux);
+                        //tagAux.setNodo(Arvore);
                         TagsAbertas.add(tagAux);
                     }
 

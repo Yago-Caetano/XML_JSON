@@ -1,4 +1,4 @@
-package com.xmlkjson;
+package com.xmlkjson.tree;
 
 import java.util.Iterator;
 import java.util.LinkedList;
