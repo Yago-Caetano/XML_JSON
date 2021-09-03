@@ -10,6 +10,16 @@ public class ArvoreNodo<T> implements Iterable<ArvoreNodo<T>> {
 
     T Data;
     ArvoreNodo<T> Pai;
+
+    public List<ArvoreNodo<T>> getFilhos() {
+        return Filhos;
+    }
+
+    public int qtdFilhos()
+    {
+        return Filhos.size();
+    }
+
     List<ArvoreNodo<T>> Filhos;
 
     public ArvoreNodo(T data) {

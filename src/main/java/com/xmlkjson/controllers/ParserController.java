@@ -1,9 +1,11 @@
 package com.xmlkjson.controllers;
 
 import com.xmlkjson.tree.Arvore;
-import com.xmlkjson.tree.ArvoreNodo;
+import com.google.gson.JsonObject;
 import com.xmlkjson.enums.EnumDecoder;
 import com.xmlkjson.models.TagModel;
+import com.xmlkjson.tree.ArvoreNodo;
+
 
 import java.util.Stack;
 
@@ -32,6 +34,10 @@ public class ParserController {
                 e.printStackTrace();
             }
         }
+
+        StringBuilder ret = new StringBuilder();
+
+        vasculhaFilhos(Arvore.getRaiz(),ret);
     }
 
     private void executar(Character C,int Indice) throws Exception {
@@ -85,5 +91,48 @@ public class ParserController {
 
         }
 
+    }
+
+    private String montaJson()
+    {
+
+        StringBuilder ret = new StringBuilder();
+
+        JsonObject objectRet = new JsonObject();
+
+        return null;
+    }
+
+    private void vasculhaFilhos(ArvoreNodo<TagModel> Nodo,StringBuilder sb)
+    {
+
+        if(Nodo.getData() != null)
+            sb.append("\"" + Nodo.getData().getNome() + "\":" );
+
+        if(Nodo.qtdFilhos()>1)
+            sb.append("[");
+
+        if(Nodo.qtdFilhos() == 0 && Nodo.getData() != null)
+        {
+            //recupera valor da string
+            sb.append(Texto.substring(Nodo.getData().getPosicaoValorIni(),Texto.indexOf("<",Nodo.getData().getPosicaoValorIni())));
+            return;
+        }
+        else
+        {
+            for(int i = 0; i < Nodo.getFilhos().size(); i++)
+            {
+                vasculhaFilhos(Nodo.getFilhos().get(i),sb);
+
+                if(i+1 != Nodo.getFilhos().size())
+                {
+                    sb.append(",");
+                }
+
+            }
+
+            if(Nodo.qtdFilhos()>1)
+                sb.append("]" );
+        }
     }
 }
