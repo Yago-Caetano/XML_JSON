@@ -12,6 +12,16 @@ public class TagModel {
 
     private boolean tagAbertura;
 
+    public int getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(int tipo) {
+        this.tipo = tipo;
+    }
+
+    private int tipo;
+
     public ArvoreNodo<TagModel> Nodo;
 
     public TagModel()
