@@ -11,6 +11,10 @@ Projeto concluído ✅
 
  ### Funcionalidades
 
-- ✅ Leitura de txt
+- ✅ Leitura do xml
 - ✅ Conversão do formato xml para o formato JSON
 - ✅ Salvar JSON
+
+## Autores
+- Rodrigo Emiliano de Oliveira  - https://github.com/RodrigoEmiliano27
+- Yago Caetano - https://github.com/Yago-Caetano
