@@ -21,9 +21,13 @@ public class ParserController {
     private final int JSON_PRIMEIRO_DA_LISTA = 2;
     private final int JSON_ITEM_LISTA = 3;
     private final int JSON_VARIAVEL = 4;
+    private final int JSON_ULTIMO_ITEM_LISTA = 5;
+    private final int JSON_ULTIMO_OBJETO = 6;
+    private final int JSON_ULTIMA_VARIAVEL = 7;
 
 
-    public void decodificar(String texto)
+
+    public void decodificar(String texto,String NomeArquivoFinal)
     {
         Texto = texto;
         Arvore = new Arvore<TagModel>();
@@ -44,6 +48,8 @@ public class ParserController {
         StringBuilder ret = new StringBuilder();
 
         vasculhaFilhos(Arvore.getRaiz(),ret);
+
+        TextIOController.write(ret.toString(),NomeArquivoFinal + ".json");
     }
 
     private void executar(Character C,int Indice) throws Exception {
@@ -90,10 +96,6 @@ public class ParserController {
                 break;
 
 
-            default:
-
-                break;
-
 
         }
 
@@ -123,6 +125,7 @@ public class ParserController {
     }
     private void trataFinalAnalise(ArvoreNodo<TagModel> nodo,StringBuilder sb)
     {
+        boolean inserirVirgula = true;
         if(nodo.getData() != null)
         {
             switch (nodo.getData().getTipo())
@@ -142,8 +145,30 @@ public class ParserController {
 
                     break;
 
+                case JSON_ULTIMA_VARIAVEL:
+                    inserirVirgula = false;
+                    break;
+
+                case JSON_ULTIMO_OBJETO:
+                    sb.append("}");
+                    inserirVirgula = false;
+                    break;
+
+                case JSON_ULTIMO_ITEM_LISTA:
+                    if(verificaObjetoOuVariavel(nodo) != JSON_OBJETO)
+                        sb.append("]");
+                    else
+                    {
+                        sb.append("}]");
+                    }
+                    inserirVirgula = false;
+                    break;
+
             }
-            sb.append(",");
+            if(inserirVirgula)
+            {
+                sb.append(",");
+            }
         }
         else
         {
@@ -157,14 +182,30 @@ public class ParserController {
     {
         if(nodo.getData() != null)
         {
-            switch (nodo.getData().getTipo())
+            int tipoAux = nodo.getData().getTipo();
+            if(tipoAux == JSON_ULTIMO_OBJETO)
+                tipoAux = JSON_OBJETO;
+            else if(tipoAux == JSON_ULTIMO_ITEM_LISTA)
+                tipoAux = JSON_ITEM_LISTA;
+            else if(tipoAux == JSON_ULTIMA_VARIAVEL)
+                tipoAux = JSON_VARIAVEL;
+
+            switch (tipoAux)
             {
                 case JSON_OBJETO:
                     sb.append("\"" + nodo.getData().getNome() + "\": {" );
                     break;
 
+
                 case JSON_PRIMEIRO_DA_LISTA:
                     sb.append("\"" + nodo.getData().getNome() + "\": [" );
+                    //verifica o tipo de filho
+                    nodo.getData().setTipo(verificaObjetoOuVariavel(nodo));
+
+                    if(nodo.getData().getTipo() == JSON_OBJETO)
+                    {
+                        sb.append("{" );
+                    }
                     break;
 
                 case JSON_ITEM_LISTA:
@@ -175,8 +216,9 @@ public class ParserController {
 
                 case JSON_VARIAVEL:
                     sb.append("\"" + nodo.getData().getNome() + "\": ");
-                    sb.append(Texto.substring(nodo.getData().getPosicaoValorIni(),Texto.indexOf("<",nodo.getData().getPosicaoValorIni())));
+                    insereValor(nodo,sb);
                     break;
+
             }
         }
         else
@@ -185,6 +227,34 @@ public class ParserController {
         }
     }
 
+    private void insereValor(ArvoreNodo<TagModel> nodo,StringBuilder sb)
+    {
+        String ValorBruto = Texto.substring(nodo.getData().getPosicaoValorIni(),Texto.indexOf("<",nodo.getData().getPosicaoValorIni()));
+
+        //tenta converter para numero
+
+        if(ValorBruto.matches(".*\\d.*"))
+        {
+            try{
+                if(ValorBruto.contains("."))
+                {
+                    double Convertido = Double.parseDouble(ValorBruto);
+                    sb.append(Convertido);
+                }
+                else
+                {
+                    int Convertido = Integer.parseInt(ValorBruto);
+                    sb.append(Convertido);
+                }
+                return;
+            }
+            catch (Exception e) {}
+        }
+
+        sb.append("\"" + ValorBruto + "\"");
+
+
+    }
 
     private void classificaFilhos(ArvoreNodo<TagModel> nodo) {
 
@@ -201,17 +271,7 @@ public class ParserController {
             //não é o inicio e nem o final
             if(i > 0 && i < Tamanho-1)
             {
-                /* CD:[
-                // "1":{},
-                // "2":{},]
 
-                CD : [{SDAAS},{ASDAD},{ADASD},{BKJDAHKJD}]
-
-                CD: [10,25,10,36,98,14]
-                <cd>10</cd>
-                <cd>25</cd>
-
-                */
                 //se o nodo for diferente da ultima tag
                 if(!NodoAtual.getData().getNome().equals(UltimaTag))
                 {
@@ -247,7 +307,12 @@ public class ParserController {
                 }
                 else
                 {
-                    NodoAtual.getData().setTipo(verificaObjetoOuVariavel(NodoAtual));
+                    int tipoAux = verificaObjetoOuVariavel(NodoAtual);
+
+                    if(tipoAux == JSON_OBJETO)
+                        NodoAtual.getData().setTipo(JSON_ULTIMO_OBJETO);
+                    else
+                        NodoAtual.getData().setTipo(JSON_ULTIMA_VARIAVEL);
                 }
 
                 UltimaTag = NodoAtual.getData().getNome();
@@ -257,11 +322,16 @@ public class ParserController {
             {
                 if(NodoAtual.getData().getNome().equals(UltimaTag))
                 {
-                    NodoAtual.getData().setTipo(JSON_ITEM_LISTA);
+                    NodoAtual.getData().setTipo(JSON_ULTIMO_ITEM_LISTA);
                 }
                 else
                 {
-                    NodoAtual.getData().setTipo(verificaObjetoOuVariavel(NodoAtual));
+                    int tipoAux = verificaObjetoOuVariavel(NodoAtual);
+
+                    if(tipoAux == JSON_OBJETO)
+                        NodoAtual.getData().setTipo(JSON_ULTIMO_OBJETO);
+                    else
+                        NodoAtual.getData().setTipo(JSON_ULTIMA_VARIAVEL);
                 }
                 UltimaTag = NodoAtual.getData().getNome();
 
